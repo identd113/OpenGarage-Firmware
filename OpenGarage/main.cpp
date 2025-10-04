@@ -907,6 +907,9 @@ void on_sta_upload() {
 		DEBUG_PRINTLN(F("Stopping all network clients"));
 		WiFiUDP::stopAll();
 		Blynk.disconnect(); // disconnect Blynk during firmware upload
+		if(mqttclient.connected()) {
+			mqttclient.publish((mqtt_topic + "/OUT/DEATH").c_str(), "offline", true);
+		}
 		mqttclient.disconnect();
 		DEBUG_PRINT(F("prepare to upload: "));
 		DEBUG_PRINTLN(upload.filename);
@@ -979,6 +982,7 @@ bool mqtt_connect_subscribe() {
 				mqttclient.subscribe(mqtt_topic.c_str());
 				mqttclient.subscribe((mqtt_topic +"/IN/#").c_str());
 				mqttclient.publish((mqtt_topic+"/OUT/STATUS").c_str(), "online", true);
+				mqttclient.publish((mqtt_topic + "/OUT/BIRTH").c_str(), "online", true);
 				DEBUG_PRINTLN(F("......Success, Subscribed to MQTT Topic"));
 				mqtt_subscribe_timeout = curr_utc_time + 5; // if successful, don't check for 5 seconds
 				return true;
